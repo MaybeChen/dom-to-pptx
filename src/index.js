@@ -1085,15 +1085,12 @@ function prepareRenderItem(
       if (align === 'start') align = 'left';
       if (align === 'end') align = 'right';
       let valign = 'top';
+      if (style.verticalAlign === 'middle') valign = 'middle';
+      if (style.verticalAlign === 'bottom') valign = 'bottom';
       if (style.alignItems === 'center') valign = 'middle';
       if (style.justifyContent === 'center' && style.display.includes('flex')) align = 'center';
 
-      const pt = parseFloat(style.paddingTop) || 0;
-      const pb = parseFloat(style.paddingBottom) || 0;
-      if (Math.abs(pt - pb) < 2) valign = 'middle';
-
       let padding = getPadding(style, config.scale);
-      if (align === 'center' && valign === 'middle') padding = [0, 0, 0, 0];
 
       textPayload = { text: textParts, align, valign, inset: padding };
     }

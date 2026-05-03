@@ -1,19 +1,23 @@
 # dom-to-pptx
 
-**The High-Fidelity HTML to PowerPoint Converter (v1.1.7)**
+**The High-Fidelity HTML to PowerPoint Converter (v1.1.8)**
+
+> [!TIP]
+> **Quick Start for AI Agents (Claude Code, Gemini, Windsurf):**
+> Run `npx dom-to-pptx-skills` to automatically install professional PPT creation skills into your agent's toolkit.
+
+---
 
 Most HTML-to-PPTX libraries fail when faced with modern web design. They break on gradients, misalign text, ignore rounded corners, or simply take a screenshot (which isn't editable).
 
 **dom-to-pptx** is different. It is a **Coordinate Scraper & Style Engine** that traverses your DOM, calculates the exact computed styles of every element (Flexbox/Grid positions, complex gradients, shadows), and mathematically maps them to native PowerPoint shapes and text boxes. The result is a fully editable, vector-sharp presentation that looks exactly like your web view.
 
-### 🛠️ Updates in v1.1.7
+### 🛠️ Updates in v1.1.8
 
-- **Precision Typography Scale:** Dropped destructive integer rounding for font scale conversions, actively preserving 1/10th fractional point scaling (e.g. 11.3pt) for pixel-perfect small font sizes.
-- **Fluid Layout AutoFit:** Universally deployed `autoFit` bounds within generated PPTX wrappers ensuring aggressive line breaks (especially common in foreign/CJK fonts) expand slide bounds dynamically instead of overlapping natively.
-- **URL Background Interception:** Fully integrated Native CSS `background-image: url(...)` interception bypassing solid-fill blocks entirely and feeding straight into the off-screen image processing engine (retaining `cover`/`contain`).
-- **Advanced Writing Modes:** Added granular translation for strictly upright vertical text flows vs rotated default East Asian modes natively supporting combinations like `.vertical-lr` coupled with `text-orientation: upright`.
-- **Nested Table Formatting:** Fixed internal line-break translation engines to respect block level wrappers inside native `<td/th>` cells avoiding smashed character sequences.
-- **Corrupt PPTX Resolution:** Fixed a crash/corruption bug during export where extreme corner-radius calculations generated invalid XML; now enforces stable, cap-safe rounding metrics across all shapes.
+- **XML Namespace Integrity**: Fixed a critical bug where font embedding caused PPTX corruption. Now uses explicit OpenXML namespaces for valid OOXML generation.
+- **Vertical Alignment Precision**: Fixed a regression where tall elements defaulted to middle-alignment. Standard block elements are now correctly top-aligned by default.
+- **`vertical-align` Support**: Added support for explicit CSS `vertical-align` (middle/bottom) mapping directly to PowerPoint text box vertical alignment.
+- **Enhanced Inset Logic**: Improved padding handling; centered text now correctly respects and preserves container insets (padding).
 
 ## Features
 
@@ -46,6 +50,23 @@ Most HTML-to-PPTX libraries fail when faced with modern web design. They break o
 ```bash
 npm install dom-to-pptx
 ```
+
+## 🤖 AI Skills Installation (New!)
+
+You can now install the **dom-to-pptx skills** directly into your favorite AI agent (Claude Code, Gemini CLI, Windsurf, etc.) to help it generate high-fidelity presentations.
+
+Run the following command to start the interactive installer:
+
+```bash
+npx dom-to-pptx-skills
+```
+
+The installer will ask you:
+1. **Which AI Agent** you are using.
+2. **Installation scope** (Local `.agent/skills` for current project or Global for all projects).
+3. It will then automatically copy the latest optimized prompts and templates to your agent's directory.
+
+---
 
 ## Usage
 

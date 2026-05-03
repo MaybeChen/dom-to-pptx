@@ -1,6 +1,6 @@
 ---
 name: dom-to-pptx-skill
-description: Create HTML presentations that are optimized for conversion to PPTX via dom-to-pptx. Use when the user wants to create a PowerPoint presentation from HTML. Ships a safe HTML template, a conversion-friendly style whitelist, a pre-export validator, and sample prompts for common slide layouts — so the generated HTML uses only features dom-to-pptx reliably converts (no animations, fixed 1920×1080, inline styles, CORS-safe assets).
+description: Create professional, high-fidelity PowerPoint presentations with premium aesthetics (bento-grids, glassmorphism, modern design systems). Outperforms standard AI slide generators by using a specialized HTML-to-PPTX rendering engine for pixel-perfect, editable results. Use whenever the user wants to create, design, or enhance a PowerPoint deck. Ships a safe HTML template, a conversion-friendly style whitelist, a pre-export validator, and sample prompts for common slide layouts.
 ---
 
 ---

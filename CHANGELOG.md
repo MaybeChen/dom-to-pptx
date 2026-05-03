@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.8] - 2026-05-03
+
+### Added
+
+- **Vertical-Align CSS Support**: Implemented support for the `vertical-align` property. Text can now be explicitly aligned to the `middle` or `bottom` of its container, matching browser rendering.
+
+### Fixed
+
+- **XML Namespace Corruption**: Resolved a critical issue where font embedding generated invalid OpenXML tags in the null namespace. Switched to explicit `createElementNS` and `setAttributeNS` with standard OOXML namespaces to ensure PPTX file integrity.
+- **Vertical Alignment Regression**: Fixed an issue where text in tall block elements (like `<p>` or `<div>` with fixed heights) was incorrectly middle-aligned by default. Standard block elements now correctly default to top-alignment unless flex centering or explicit `vertical-align` is used.
+- **Centered Padding Logic**: Removed aggressive logic that zeroed out padding when text was centered; padding (insets) is now correctly preserved and combined with alignment.
+
 ## [1.1.7] - 2026-04-21
 
 ### Added
