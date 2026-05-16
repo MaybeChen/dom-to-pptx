@@ -577,8 +577,12 @@ function prepareRenderItem(
   const elementOpacity = parseFloat(style.opacity);
   const safeOpacity = isNaN(elementOpacity) ? 1 : elementOpacity;
 
-  const widthPx = node.offsetWidth || rect.width;
-  const heightPx = node.offsetHeight || rect.height;
+  // Prefer the sub-pixel rect size to avoid 1px text-wrap artifacts caused by
+  // offsetWidth/offsetHeight being integer-rounded. When the element is rotated
+  // we must fall back to offset* because rect.* describes the rotated bounding box.
+  const widthPx = rotation === 0 ? rect.width || node.offsetWidth : node.offsetWidth || rect.width;
+  const heightPx =
+    rotation === 0 ? rect.height || node.offsetHeight : node.offsetHeight || rect.height;
   const unrotatedW = widthPx * PX_TO_INCH * config.scale;
   const unrotatedH = heightPx * PX_TO_INCH * config.scale;
   const centerX = rect.left + rect.width / 2;
@@ -1196,8 +1200,9 @@ function prepareRenderItem(
     }
 
     if (textPayload) {
+      const fs0 = textPayload.text[0]?.options?.fontSize;
       textPayload.text[0].options.fontSize =
-        Number(textPayload.text[0]?.options?.fontSize?.toFixed(1)) || 12;
+        typeof fs0 === 'number' ? Math.floor(fs0 * 10) / 10 : 12;
       items.push({
         type: 'text',
         zIndex: zIndex + 1,
@@ -1310,8 +1315,9 @@ function prepareRenderItem(
       }
 
       if (textPayload) {
+        const fs0 = textPayload.text[0]?.options?.fontSize;
         textPayload.text[0].options.fontSize =
-          Number(textPayload.text[0]?.options?.fontSize?.toFixed(1)) || 12;
+          typeof fs0 === 'number' ? Math.floor(fs0 * 10) / 10 : 12;
         const textOptions = {
           shape: shapeType,
           ...shapeOpts,

@@ -475,7 +475,7 @@ export function getTextStyle(style, scale) {
   return {
     color: colorObj.hex || '000000',
     fontFace: style.fontFamily.split(',')[0].replace(/['"]/g, ''),
-    fontSize: Number((fontSizePx * 0.75 * scale).toFixed(1)),
+    fontSize: Math.floor(fontSizePx * 0.75 * scale * 10) / 10,
     bold: parseInt(style.fontWeight) >= 600,
     italic: style.fontStyle === 'italic',
     underline: style.textDecoration.includes('underline'),
