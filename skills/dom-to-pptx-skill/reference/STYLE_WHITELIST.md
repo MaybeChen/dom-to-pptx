@@ -1,6 +1,6 @@
 # Style Whitelist for dom-to-pptx
 
-**Source of truth** for which CSS/HTML features convert reliably to PPTX. Distilled from `dom-to-pptx@1.1.7` source (`src/utils.js`, `src/index.js`), `SUPPORTED.md`, and `USAGE.md`.
+**Source of truth** for which CSS/HTML features convert reliably to PPTX. Distilled from `dom-to-pptx@latest` source (`src/utils.js`, `src/index.js`), `SUPPORTED.md`, and `USAGE.md`.
 
 Categories:
 

@@ -1,6 +1,6 @@
 {
   "name": "dom-to-pptx",
-  "version": "1.1.8",
+  "version": "1.1.9",
   "description": "A client-side library that converts any HTML element into a fully editable PowerPoint slide. **dom-to-pptx** transforms DOM structures into pixel-accurate `.pptx` content, preserving gradients, shadows, rounded images, and responsive layouts. It translates CSS Flexbox/Grid, linear-gradients, box-shadows, and typography into native PowerPoint shapes, enabling precise, design-faithful slide generation directly from the browser.",
   "main": "dist/dom-to-pptx.cjs",
   "module": "dist/dom-to-pptx.mjs",
@@ -36,6 +36,7 @@
     "url": "git+https://github.com/atharva9167j/dom-to-pptx.git"
   },
   "keywords": [
+    "ppt",
     "pptx",
     "html-to-pptx",
     "powerpoint",
@@ -45,6 +46,7 @@
     "dom",
     "dom-to-pptx",
     "export",
+    "export-pptx",
     "browser-export",
     "client-side-pptx",
     "html-to-powerpoint",
@@ -63,7 +65,11 @@
     "gradient-support",
     "flexbox",
     "css-grid",
-    "typography"
+    "typography",
+    "pptx-skills",
+    "ppt-creation-skills",
+    "dom-to-pptx-skills",
+    "powerpoint-skills"
   ],
   "author": "Atharva Dharmendra Jagtap <atharvaj321@gmail.com>",
   "license": "MIT",
@@ -82,6 +88,7 @@
     "jsdom": "^28.0.0",
     "prettier": "^3.7.3",
     "process": "^0.11.10",
+    "rollup": "^4.18.0",
     "rollup-plugin-polyfill-node": "^0.10.1",
     "stream-browserify": "^3.0.0",
     "util": "^0.12.5",

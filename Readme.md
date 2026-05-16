@@ -1,6 +1,6 @@
 # dom-to-pptx
 
-**The High-Fidelity HTML to PowerPoint Converter (v1.1.8)**
+**The High-Fidelity HTML to PowerPoint Converter (v1.1.9)**
 
 > [!TIP]
 > **Quick Start for AI Agents (Claude Code, Gemini, Windsurf):**
@@ -12,12 +12,13 @@ Most HTML-to-PPTX libraries fail when faced with modern web design. They break o
 
 **dom-to-pptx** is different. It is a **Coordinate Scraper & Style Engine** that traverses your DOM, calculates the exact computed styles of every element (Flexbox/Grid positions, complex gradients, shadows), and mathematically maps them to native PowerPoint shapes and text boxes. The result is a fully editable, vector-sharp presentation that looks exactly like your web view.
 
-### 🛠️ Updates in v1.1.8
+### 🛠️ Updates in v1.1.9
 
-- **XML Namespace Integrity**: Fixed a critical bug where font embedding caused PPTX corruption. Now uses explicit OpenXML namespaces for valid OOXML generation.
-- **Vertical Alignment Precision**: Fixed a regression where tall elements defaulted to middle-alignment. Standard block elements are now correctly top-aligned by default.
-- **`vertical-align` Support**: Added support for explicit CSS `vertical-align` (middle/bottom) mapping directly to PowerPoint text box vertical alignment.
-- **Enhanced Inset Logic**: Improved padding handling; centered text now correctly respects and preserves container insets (padding).
+- **Native Hyperlink Support**: Added support for `<a>` tags with `href` and `title` (tooltip) mapping directly to PowerPoint text runs.
+- **Flexbox Axis-Swap Intelligence**: Fixed centering issues in `flex-direction: column` containers by dynamically swapping alignment axes.
+- **Vertical Text Optimization**: Resolved character-stacking gaps in vertical writing modes and fixed alignment for vertical block containers.
+- **Width Safety Buffers**: Implemented sub-pixel rect sizing for unrotated elements, preserve offset sizing for rotated elements, floor font sizes to 0.1pt, and add a 1.5% text width buffer to prevent cross-platform wrapping differences.
+- **Enhanced Agentic Skills**: The `dom-to-pptx-skill` has been upgraded to v2.0, featuring an "Atmospheric UI" design engine, multi-phase autonomous workflows, and automated local image management.
 
 ## Features
 

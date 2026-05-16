@@ -12,7 +12,7 @@ const rl = readline.createInterface({
 const question = (query) => new Promise((resolve) => rl.question(query, resolve));
 
 async function main() {
-  console.log('\n\x1b[36m%s\x1b[0m', '🚀 dom-to-pptx Skills Installer');
+  console.log('\n\x1b[36m%s\x1b[0m', '🚀 dom-to-pptx Skills Installer (v2.0)');
   console.log('-----------------------------------');
 
   const homeDir = process.env.HOME || process.env.USERPROFILE || process.env.HOMEPATH;
@@ -79,7 +79,8 @@ async function main() {
 
     copyRecursiveSync(sourceDir, targetDir);
 
-    console.log('\n\x1b[32m%s\x1b[0m', '✅ Success! dom-to-pptx skills installed.');
+    console.log('\n\x1b[32m%s\x1b[0m', '✅ Success! dom-to-pptx "Atmospheric UI" skills installed.');
+    console.log('Your agent is now equipped with the Premium Presentation Engineering framework.');
     console.log('You may need to restart your AI agent to see the new skill.');
   } catch (err) {
     console.error('\n\x1b[31m%s\x1b[0m', '❌ Error during installation:');

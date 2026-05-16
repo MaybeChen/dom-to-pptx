@@ -232,20 +232,26 @@ async function processSlide(root, slide, pptx, globalOptions = {}) {
   let domOrderCounter = 0;
 
   // Sync Traversal Function
-  function collect(node, parentZIndex) {
+  function collect(node, parentZIndex, parentOpacity = 1) {
     const order = domOrderCounter++;
 
     let currentZ = parentZIndex;
+    let currentOpacity = parentOpacity;
     let nodeStyle = null;
     const nodeType = node.nodeType;
 
     if (nodeType === 1) {
       nodeStyle = window.getComputedStyle(node);
+      const elOpacity = parseFloat(nodeStyle.opacity);
+      if (!isNaN(elOpacity)) {
+        currentOpacity *= elOpacity;
+      }
+
       // Optimization: Skip completely hidden elements immediately
       if (
         nodeStyle.display === 'none' ||
         nodeStyle.visibility === 'hidden' ||
-        nodeStyle.opacity === '0'
+        currentOpacity === 0
       ) {
         return;
       }
@@ -262,7 +268,7 @@ async function processSlide(root, slide, pptx, globalOptions = {}) {
       pptx,
       currentZ,
       nodeStyle,
-      globalOptions
+      { ...globalOptions, _inheritedOpacity: parentOpacity }
     );
 
     if (result) {
@@ -280,7 +286,7 @@ async function processSlide(root, slide, pptx, globalOptions = {}) {
     // Recurse children synchronously
     const childNodes = node.childNodes;
     for (let i = 0; i < childNodes.length; i++) {
-      collect(childNodes[i], currentZ);
+      collect(childNodes[i], currentZ, currentOpacity);
     }
   }
 
@@ -555,7 +561,7 @@ function prepareRenderItem(
           textParts: [
             {
               text: textContent,
-              options: getTextStyle(style, config.scale),
+              options: getTextStyle(style, config.scale, true, globalOptions._inheritedOpacity || 1),
             },
           ],
           options: { x, y, w: unrotatedW, h: unrotatedH, margin: 0, autoFit: true },
@@ -575,7 +581,9 @@ function prepareRenderItem(
   const rotation = getRotation(style.transform);
   const writingModeVert = getWritingModeVert(style.writingMode, style.textOrientation);
   const elementOpacity = parseFloat(style.opacity);
-  const safeOpacity = isNaN(elementOpacity) ? 1 : elementOpacity;
+  const localOpacity = isNaN(elementOpacity) ? 1 : elementOpacity;
+  const inheritedOpacity = globalOptions._inheritedOpacity || 1;
+  const safeOpacity = localOpacity * inheritedOpacity;
 
   // Prefer the sub-pixel rect size to avoid 1px text-wrap artifacts caused by
   // offsetWidth/offsetHeight being integer-rounded. When the element is rotated
@@ -1053,56 +1061,8 @@ function prepareRenderItem(
   const isText = isTextContainer(node);
 
   if (isText) {
-    const textParts = [];
-    let trimNextLeading = false;
+    const textParts = collectTextParts(node, style, config.scale, null, true, inheritedOpacity);
 
-    node.childNodes.forEach((child, index) => {
-      // Handle <br> tags
-      if (child.tagName === 'BR') {
-        // 1. Trim trailing space from the *previous* text part to prevent double wrapping
-        if (textParts.length > 0) {
-          const lastPart = textParts[textParts.length - 1];
-          if (lastPart.text && typeof lastPart.text === 'string') {
-            lastPart.text = lastPart.text.trimEnd();
-          }
-        }
-
-        textParts.push({ text: '', options: { breakLine: true } });
-
-        // 2. Signal to trim leading space from the *next* text part
-        trimNextLeading = true;
-        return;
-      }
-
-      let textVal = child.nodeType === 3 ? child.nodeValue : child.textContent;
-      let nodeStyle = child.nodeType === 1 ? window.getComputedStyle(child) : style;
-      textVal = textVal.replace(/[\n\r\t]+/g, ' ').replace(/\s{2,}/g, ' ');
-
-      // Trimming logic
-      if (index === 0) textVal = textVal.trimStart();
-      if (trimNextLeading) {
-        textVal = textVal.trimStart();
-        trimNextLeading = false;
-      }
-
-      if (index === node.childNodes.length - 1) textVal = textVal.trimEnd();
-      if (nodeStyle.textTransform === 'uppercase') textVal = textVal.toUpperCase();
-      if (nodeStyle.textTransform === 'lowercase') textVal = textVal.toLowerCase();
-
-      if (textVal.length > 0) {
-        const textOpts = getTextStyle(nodeStyle, config.scale);
-
-        // BUG FIX: Numbers 1 and 2 having background.
-        // If this is a naked Text Node (nodeType 3), it inherits style from the parent container.
-        // The parent container's background is already rendered as the Shape Fill.
-        // We must NOT render it again as a Text Highlight, otherwise it looks like a solid marker on top of the shape.
-        if (child.nodeType === 3 && textOpts.highlight) {
-          delete textOpts.highlight;
-        }
-
-        textParts.push({ text: textVal, options: textOpts });
-      }
-    });
 
     if (textParts.length > 0) {
       let align = style.textAlign || 'left';
@@ -1111,12 +1071,41 @@ function prepareRenderItem(
       let valign = 'top';
       if (style.verticalAlign === 'middle') valign = 'middle';
       if (style.verticalAlign === 'bottom') valign = 'bottom';
-      if (style.alignItems === 'center') valign = 'middle';
-      if (style.justifyContent === 'center' && style.display.includes('flex')) align = 'center';
+
+      // Fix: Handle Flexbox axis swap for vertical writing modes OR column-direction flex
+      const isVertical = writingModeVert && writingModeVert !== 'none';
+      const isColumn =
+        style.flexDirection === 'column' || style.flexDirection === 'column-reverse';
+
+      if (isVertical || isColumn) {
+        // Vertical Axis Swap (Main axis is vertical)
+        if (style.alignItems === 'center') align = 'center';
+        if (style.alignItems === 'flex-end' || style.alignItems === 'end') align = 'right';
+
+        if (style.justifyContent === 'center' && style.display.includes('flex')) valign = 'middle';
+        if (style.justifyContent === 'flex-end' && style.display.includes('flex')) valign = 'bottom';
+      } else {
+        // Standard Row Axis (Main axis is horizontal)
+        if (style.alignItems === 'center') valign = 'middle';
+        if (style.alignItems === 'flex-end' || style.alignItems === 'end') valign = 'bottom';
+
+        if (style.justifyContent === 'center' && style.display.includes('flex')) align = 'center';
+        if (style.justifyContent === 'flex-end' || style.justifyContent === 'end') {
+          if (style.display.includes('flex')) align = 'right';
+        }
+      }
+
+      // Fix: Suppress lineSpacing for vertical text to prevent improper character gaps
+      if (isVertical) {
+        textParts.forEach((p) => {
+          if (p.options) delete p.options.lineSpacing;
+        });
+      }
 
       let padding = getPadding(style, config.scale);
 
       textPayload = { text: textParts, align, valign, inset: padding };
+
     }
   }
 
@@ -1211,7 +1200,7 @@ function prepareRenderItem(
         options: {
           x,
           y,
-          w,
+          w: w * 1.05, // Safety buffer to prevent wrapping
           h,
           align: textPayload.align,
           valign: textPayload.valign,
@@ -1321,6 +1310,8 @@ function prepareRenderItem(
         const textOptions = {
           shape: shapeType,
           ...shapeOpts,
+          w: w * 1.015, // Safety buffer to prevent wrapping
+          h,
           rotate: rotation,
           align: textPayload.align,
           valign: textPayload.valign,

@@ -24,6 +24,7 @@ exported-pptx/
 
 # Test files (wildcards)
 test*
+scratch*
 
 # Misc files
 ins.md

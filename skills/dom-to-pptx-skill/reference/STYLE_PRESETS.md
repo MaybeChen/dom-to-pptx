@@ -572,24 +572,71 @@ Visual styles adapted for dom-to-pptx compatibility. Each preset provides inline
 
 ---
 
-## Color Palette Quick Reference
+---
 
-| Style            | Background        | Accent                | Text              |
-| ---------------- | ----------------- | --------------------- | ----------------- |
-| Bold Signal      | #1a1a1a           | #FF5722               | #ffffff           |
-| Electric Studio  | #0a0a0a / #ffffff | #4361ee               | #0a0a0a / #ffffff |
-| Creative Voltage | #0066ff / #1a1a2e | #d4ff00               | #ffffff           |
-| Dark Botanical   | #0f0f0f           | #d4a574               | #e8e4df           |
-| Pastel Light     | #f8f6f1           | #f0b4d4               | #1a1a1a           |
-| Corporate Navy   | #1e3a5f           | #0066cc               | #ffffff           |
-| Minimal White    | #ffffff           | #0066cc               | #1a1a1a           |
-| Gradient Modern  | #667eea→#764ba2   | rgba(255,255,255,0.2) | #ffffff           |
-| Neo-Brutalism    | #FEF08A           | #FF6B6B               | #000000           |
-| Soft Pastel      | #F0F9FF           | #FDA4AF               | #1d1d1d           |
-| Swiss Minimalism | #FFFFFF           | #DC2626               | #000000           |
-| Nature Eco       | #F7FEE7           | #166534               | #064E3B           |
-| Luxury Noir      | #0A0A0A           | #D4AF37               | #FFFFFF           |
-| Cyberpunk Neon   | #020617           | #D946EF               | #22D3EE           |
+## 15. Swiss Foundry (Premium)
+
+**Vibe:** 1950s Swiss Modernism. Clinical, authoritative, and clean.
+
+**Design Logic:**
+- **Materiality:** Warm, unbleached physical paper.
+- **Light Physics:** Flat, no shadows.
+- **Spatial Tension:** Rigid mathematical grid with aggressive negative space.
+
+**Colors:**
+- [Color 1] BASE (Background): `#F9F9F7`
+- [Color 2] SURFACE (Cards): `#FFFFFF`
+- [Color 3] ACCENT: `#E63946` (Signal Red)
+- [Color 4] TYPE-PRIMARY: `#1A1A1A`
+- [Color 5] TYPE-SECONDARY: `#666666`
+
+---
+
+## 16. Linen & Obsidian (Premium)
+
+**Vibe:** High-end architectural minimalism. Tactile and organic.
+
+**Design Logic:**
+- **Materiality:** Textured linen and matte ceramic.
+- **Light Physics:** Subtle 1px inner borders instead of drop shadows.
+- **Spatial Tension:** Airy, breathable, with heavy visual anchors.
+
+**Colors:**
+- [Color 1] BASE (Background): `#F2EDE4`
+- [Color 2] SURFACE (Cards): `#E5DED1`
+- [Color 3] ACCENT: `#2C2C2C` (Matte Obsidian)
+- [Color 4] TYPE-PRIMARY: `#121212`
+- [Color 5] TYPE-SECONDARY: `#4A4A4A`
+
+---
+
+## 17. Veridian Studio (Premium)
+
+**Vibe:** Serene gallery-like atmosphere. "Soft-Industrial" elegance.
+
+**Design Logic:**
+- **Materiality:** Custom-molded clay or high-end tech hardware.
+- **Light Physics:** Soft, diffuse lighting with exaggerated rounded corners (32px+).
+- **Spatial Tension:** Generous padding and expansive margins.
+
+**Colors:**
+- [Color 1] BASE (Background): `#FBFBFA`
+- [Color 2] SURFACE (Cards): `#F1F3F0`
+- [Color 3] ACCENT: `#2D4C3E` (Oxidized Veridian)
+- [Color 4] TYPE-PRIMARY: `#1A1C1B`
+- [Color 5] TYPE-SECONDARY: `#5C6360`
+
+---
+
+## Color Palette Quick Reference (Updated)
+
+| Style             | Background | Surface  | Accent  | Type 1  | Type 2  |
+| ----------------- | ---------- | -------- | ------- | ------- | ------- |
+| Swiss Foundry     | #F9F9F7    | #FFFFFF  | #E63946 | #1A1A1A | #666666 |
+| Linen & Obsidian  | #F2EDE4    | #E5DED1  | #2C2C2C | #121212 | #4A4A4A |
+| Veridian Studio   | #FBFBFA    | #F1F3F0  | #2D4C3E | #1A1C1B | #5C6360 |
+| Luxury Noir       | #0A0A0A    | #171717  | #D4AF37 | #FFFFFF | #A3A3A3 |
+| Swiss Minimalism  | #FFFFFF    | #F4F4F5  | #DC2626 | #000000 | #3F3F46 |
 
 ---
 

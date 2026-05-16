@@ -2,14 +2,27 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.1.9] - 2026-05-07
+## [1.1.9] - 2026-05-16
+
+### Added
+
+- **Native Hyperlink Support**: Implemented recursive hyperlink extraction for `<a>` tags. Maps `href` to PowerPoint URLs and `title` attributes to native tooltips.
+- **Flexbox Axis-Swap Intelligence**: Added `flex-direction` aware alignment. Centering now works correctly for both `row` and `column` flex containers by dynamically swapping `align`/`valign` axes based on the main-axis orientation.
+- **Expanded Text Tag Support**: Added `CENTER`, `P`, and `H1-H6` to the "safe text" whitelist, allowing these elements to render as single unified PowerPoint shapes rather than fragmented items.
+- **Enhanced Agentic Skills (v2.0)**: Re-architected the `dom-to-pptx-skill` into an autonomous presentation engineering framework.
+  - **Atmospheric UI Engine**: Codified premium design philosophies (Luminous Bias, Spatial Tension, Materiality) into the skill directives.
+  - **Multi-Phase Workflow**: Added mandatory phases for Content Intelligence, Theme Engineering, and Pre-Export Validation.
+  - **Local Image Strategy**: Implemented automated local image generation and management using the `images/` directory workflow.
 
 ### Fixed
 
-- **Microsoft PowerPoint Compatibility**: Generated `.pptx` files were rejected by Microsoft PowerPoint as "corrupt" while WPS Office opened them fine. Two root causes fixed:
-  - PptxGenJS produced a zip stored with `STORED` instead of `DEFLATED`. Output is now always re-zipped with `DEFLATE` (level 6) before download.
-  - `[Content_Types].xml` advertised `Override` parts (e.g. `slideMaster2.xml`–`slideMaster8.xml`) that were never actually written into the package. Dangling `Override` entries are now stripped by the new `pptx-normalizer` module on every export, on both the font-embedding and no-font paths.
-- A new `options.skipNormalize` (default `false`) escape hatch is available for debugging the raw PptxGenJS output. Leave it off unless you know what you are doing.
+- **Hyperlink Text Styling**: Fixed a bug where text inheriting a hyperlink (from a parent `<a>` tag) was not inheriting the parent's text styling (e.g., font, size, color).
+- **Microsoft PowerPoint Compatibility**: Resolved a critical issue where dangling `[Content_Types].xml` overrides and `STORED` zip formats caused PowerPoint to reject files. All exports are now normalized and re-zipped with `DEFLATE`.
+- **Vertical Text Optimization**: Resolved character spacing gaps in vertical writing modes (`writing-mode: vertical-rl/lr`) and corrected alignment axis mapping for vertical text blocks.
+- **Text Wrap & Width Buffer**: Implemented sub-pixel rect sizing for unrotated elements, preserve offset sizing for rotated elements, floor font sizes to 0.1pt, and add a 1.5% text width buffer to prevent cross-platform wrapping differences.
+- **Redundant Spacing Fix**: Fixed a bug where root element margins were double-applied as internal paragraph spacing. standalone text boxes now align perfectly with their DOM counterparts.
+- **Options**: A new `options.skipNormalize` (default `false`) escape hatch is available for debugging the raw PptxGenJS output.
+- **Full Opacity Inheritance**: Implemented accumulated opacity tracking during DOM traversal, ensuring nested elements and text runs correctly reflect the transparency of parent containers.
 
 ## [1.1.8] - 2026-05-03
 
@@ -89,6 +102,7 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 
+- **AutoFit CJK Word Wraps**: Swapped out hard bounding boxes on textual spans to inject `<a:spAutoFit/>`, letting PowerPoint actively grow the block bounds when fluid lines or CJK formats forcefully wrap beyond the original Chrome layout metric.
 - **Text Alignment**: Fixed an issue where text containers were slightly shorter than browser rendering, causing overlap with subsequent elements. Added a precision buffer to account for font metric differences.
 - **Line Breaks**: Fixed an issue where `<br>` tags with surrounding whitespace caused double line breaks in the output.
 - **Missing Elements (Cone Fix)**: Fixed a bug where empty elements with solid backgrounds and partial border radii (e.g., decorative shapes) were skipped during rasterization. We now generate a high-fidelity Vector SVG for these shapes.

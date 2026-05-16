@@ -10,11 +10,11 @@ Every prompt below already bakes in the constraints from [STYLE_WHITELIST.md](ST
 
 When generating slides, always adhere to these elite design principles:
 
-- **Aesthetics:** Clean, modern, "Apple Keynote" style. Use subtle gradients, soft shadows (`box-shadow: 0 20px 50px rgba(0,0,0,0.1)`), and rounded corners (`border-radius: 24px`).
-- **Typography:** Create dramatic contrast. Use massive, thin headers paired with bold, wide-tracked subheaders.
-- **Layout:** Prioritize whitespace (60%+). Never stack more than 3 elements vertically. Use horizontal distribution (Grid/Flex) for 3+ items.
-- **Anti-Overflow:** Every container must have `overflow: hidden` and `min-height: 0` to prevent vertical blowout.
-- **Images:** Use descriptive keywords joined by underscores for `gen.pollinations.ai`. Style them with `object-fit: cover` and large `border-radius`.
+- **Aesthetics:** Clean, modern, "Apple Keynote" style. Use multi-layered shadows, subtle gradients, and large rounded corners (`32px`).
+- **Typography:** Create dramatic contrast. Pair massive, ultra-thin headers with bold, wide-tracked subheaders.
+- **Layout:** Prioritize whitespace (60%+). Implement **Advanced Layouts** from `DESIGN_PHILOSOPHY.md` (Bento-Box, Asymmetrical Editorial, Typographic Poster).
+- **Anti-Overflow:** Every container must have `overflow: hidden` and `min-height: 0`. Limit body text to 12-15 words max.
+- **Images:** Use hyper-aesthetic custom made images or use images from Pexels, Unsplash, URL from internet. Style them with `object-fit: cover` and `32px` border-radius.
 
 ---
 
@@ -44,7 +44,7 @@ Copy and paste this into any prompt to apply a specific theme:
   <VISUALS>
     - Background: Linear-gradient (135deg, HEX1 0%, HEX2 100%)
     - Accent: A single geometric shape (bar or circle) in HEX3
-    - Image (optional): You can use any image from the web, from Pexels, Unsplash, URL from internet, or any ai image generator like pollinations.
+    - Image (optional): You can use any image from the web, from Pexels, Unsplash, URL from internet, or any ai image generator.
   </VISUALS>
   <TYPOGRAPHY>
     - Title: 96px, weight 800, tracking-tight, Arial/Helvetica
@@ -120,7 +120,7 @@ Requirements:
       <CTA>[CTA]</CTA>
     </LEFT_COL>
     <RIGHT_COL>
-      <IMAGE>https://image.pollinations.ai/prompt/[IMAGE_DESCRIPTION]?model=flux</IMAGE>
+      <IMAGE>https://www.example.com/image.png</IMAGE>
     </RIGHT_COL>
   </CONTENT>
   <LAYOUT>
