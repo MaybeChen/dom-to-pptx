@@ -569,7 +569,18 @@ function prepareRenderItem(
               ),
             },
           ],
-          options: { x, y, w: unrotatedW, h: unrotatedH, margin: 0, autoFit: true },
+          // Honor CSS white-space: a `nowrap`/`pre` element must not re-wrap in
+          // the exported slide (otherwise a single line measured in the browser
+          // can wrap in PowerPoint/LibreOffice due to font-metric differences).
+          options: {
+            x,
+            y,
+            w: unrotatedW,
+            h: unrotatedH,
+            margin: 0,
+            autoFit: true,
+            wrap: !(style.whiteSpace === 'nowrap' || style.whiteSpace === 'pre'),
+          },
         },
       ],
       stopRecursion: false,
@@ -835,7 +846,7 @@ function prepareRenderItem(
           valign: 'top',
           margin: 0,
           autoFit: true,
-          wrap: true,
+          wrap: !(style.whiteSpace === 'nowrap' || style.whiteSpace === 'pre'),
           vert: writingModeVert,
         },
       });
@@ -1210,7 +1221,7 @@ function prepareRenderItem(
           inset: textPayload.inset,
           rotate: rotation,
           margin: 0,
-          wrap: true,
+          wrap: !(style.whiteSpace === 'nowrap' || style.whiteSpace === 'pre'),
           autoFit: true,
           vert: writingModeVert,
         },
@@ -1320,7 +1331,7 @@ function prepareRenderItem(
           valign: textPayload.valign,
           inset: textPayload.inset,
           margin: 0,
-          wrap: true,
+          wrap: !(style.whiteSpace === 'nowrap' || style.whiteSpace === 'pre'),
           autoFit: true,
           vert: writingModeVert,
         };
