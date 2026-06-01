@@ -17,7 +17,7 @@ function getTableBorder(style, side, scale) {
     return null;
   }
 
-  const color = parseColor(colorStr);
+  const color = parseColor(colorStr, style);
   if (!color.hex || color.opacity === 0) return null;
 
   let dash = 'solid';
@@ -81,14 +81,14 @@ export function extractTableData(node, scale) {
       const textStyle = getTextStyle(style, scale);
 
       // B. Cell Background
-      let bg = parseColor(style.backgroundColor);
+      let bg = parseColor(style.backgroundColor, style);
       if (
         (!bg.hex || bg.opacity === 0) &&
         style.backgroundImage &&
         style.backgroundImage !== 'none'
       ) {
-        const fallback = getGradientFallbackColor(style.backgroundImage);
-        if (fallback) bg = parseColor(fallback);
+        const fallback = getGradientFallbackColor(style.backgroundImage, style);
+        if (fallback) bg = parseColor(fallback, style);
       }
       const fill = bg.hex && bg.opacity > 0 ? { color: bg.hex } : null;
 
@@ -168,12 +168,17 @@ export function isClippedByParent(node) {
 
 // Helper to save gradient text
 // Helper to save gradient text: extracts the first color from a gradient string
-export function getGradientFallbackColor(bgImage) {
+export function getGradientFallbackColor(bgImage, style) {
   if (!bgImage || bgImage === 'none') return null;
+
+  let resolvedBgImage = bgImage;
+  if (style) {
+    resolvedBgImage = resolveCssVariables(bgImage, style);
+  }
 
   // 1. Extract content inside function(...)
   // Handles linear-gradient(...), radial-gradient(...), repeating-linear-gradient(...)
-  const match = bgImage.match(/gradient\((.*)\)/);
+  const match = resolvedBgImage.match(/gradient\((.*)\)/);
   if (!match) return null;
 
   const content = match[1];
@@ -308,7 +313,7 @@ export function generateCompositeBorderSVG(w, h, radius, sides) {
         </g>
     </svg>`;
 
-  return 'data:image/svg+xml;base64,' + btoa(svg);
+  return 'data:image/svg+xml;base64,' + btoa(svg.trim());
 }
 
 /**
@@ -350,12 +355,36 @@ export function generateCustomShapeSVG(w, h, color, opacity, radii) {
       <path d="${path}" fill="#${color}" fill-opacity="${opacity}" />
     </svg>`;
 
-  return 'data:image/svg+xml;base64,' + btoa(svg);
+  return 'data:image/svg+xml;base64,' + btoa(svg.trim());
 }
 
 // --- REPLACE THE EXISTING parseColor FUNCTION ---
-export function parseColor(str) {
-  if (!str || str === 'transparent' || str.trim() === 'rgba(0, 0, 0, 0)') {
+export function resolveCssVariables(value, style) {
+  if (!value || typeof value !== 'string') return value;
+  let resolved = value;
+  let match;
+  let iterations = 0;
+  // Limit to 10 iterations to prevent infinite loop
+  while ((match = resolved.match(/var\((--[a-zA-Z0-9_-]+)\)/)) && iterations < 10) {
+    iterations++;
+    const varName = match[1];
+    const varValue = style.getPropertyValue(varName).trim();
+    if (varValue) {
+      resolved = resolved.replace(match[0], varValue);
+    } else {
+      break;
+    }
+  }
+  return resolved;
+}
+
+export function parseColor(str, style) {
+  if (!str) return { hex: null, opacity: 0 };
+  let resolvedStr = str;
+  if (style) {
+    resolvedStr = resolveCssVariables(str, style);
+  }
+  if (resolvedStr === 'transparent' || resolvedStr.trim() === 'rgba(0, 0, 0, 0)') {
     return { hex: null, opacity: 0 };
   }
 
@@ -432,7 +461,7 @@ export function getSoftEdges(filterStr, scale) {
 }
 
 export function getTextStyle(style, scale, includeMargins = true, inheritedOpacity = 1) {
-  let colorObj = parseColor(style.color);
+  let colorObj = parseColor(style.color, style);
   let opacity = colorObj.opacity * inheritedOpacity;
 
   // Combine text color alpha with element-level opacity
@@ -443,8 +472,8 @@ export function getTextStyle(style, scale, includeMargins = true, inheritedOpaci
 
   const bgClip = style.webkitBackgroundClip || style.backgroundClip;
   if (colorObj.opacity === 0 && bgClip === 'text') {
-    const fallback = getGradientFallbackColor(style.backgroundImage);
-    if (fallback) colorObj = parseColor(fallback);
+    const fallback = getGradientFallbackColor(style.backgroundImage, style);
+    if (fallback) colorObj = parseColor(fallback, style);
   }
 
   let lineSpacing = null;
@@ -487,7 +516,7 @@ export function getTextStyle(style, scale, includeMargins = true, inheritedOpaci
     color: colorObj.hex || '000000',
     ...(transparency > 0 && { transparency }),
     fontFace: style.fontFamily.split(',')[0].replace(/['"]/g, ''),
-    fontSize: Math.floor(fontSizePx * 0.75 * scale * 10) / 10,
+    fontSize: fontSizePx * 0.75 * scale,
     bold: parseInt(style.fontWeight) >= 600,
     italic: style.fontStyle === 'italic',
     underline: style.textDecoration.includes('underline'),
@@ -496,8 +525,8 @@ export function getTextStyle(style, scale, includeMargins = true, inheritedOpaci
     ...(paraSpaceBefore > 0 && { paraSpaceBefore }),
     ...(paraSpaceAfter > 0 && { paraSpaceAfter }),
     // Map background color to highlight if present
-    ...(parseColor(style.backgroundColor).hex
-      ? { highlight: parseColor(style.backgroundColor).hex }
+    ...(parseColor(style.backgroundColor, style).hex
+      ? { highlight: parseColor(style.backgroundColor, style).hex }
       : {}),
     // Mapping letter-spacing to charSpacing
     ...(style.letterSpacing && style.letterSpacing !== 'normal'
@@ -523,25 +552,39 @@ export function isTextContainer(node) {
     // 2. Reject Explicit Images/SVGs
     if (el.tagName === 'IMG' || el.tagName === 'SVG') return false;
 
-    // 3. Reject Class-based Icons (FontAwesome, Material, Bootstrap, etc.)
-    // If an <i> or <span> has icon classes, it is a visual object, not text.
     if (el.tagName === 'I' || el.tagName === 'SPAN') {
       const cls = el.getAttribute('class') || '';
       if (
-        cls.includes('fa-') ||
-        cls.includes('fas') ||
-        cls.includes('far') ||
-        cls.includes('fab') ||
-        cls.includes('material-icons') ||
-        cls.includes('bi-') ||
-        cls.includes('icon')
+        typeof cls === 'string' &&
+        (cls.includes('fa-') ||
+          cls.includes('fas') ||
+          cls.includes('far') ||
+          cls.includes('fab') ||
+          cls.includes('material-icons') ||
+          cls.includes('bi-') ||
+          cls.includes('icon'))
       ) {
-        return false;
+        // Double-check: Must have pseudo-element content to be a CSS icon
+        const before = window.getComputedStyle(el, '::before').content;
+        const after = window.getComputedStyle(el, '::after').content;
+        const hasContent = (c) => c && c !== 'none' && c !== 'normal' && c !== '""';
+
+        if (hasContent(before) || hasContent(after)) return false;
       }
     }
 
     const style = window.getComputedStyle(el);
     const display = style.display;
+
+    // Reject block displays and flex/grid items
+    const isBlockDisplay =
+      display === 'block' || display === 'flex' || display === 'grid' || display === 'table';
+    if (isBlockDisplay) return false;
+
+    const parentStyle = el.parentElement ? window.getComputedStyle(el.parentElement) : null;
+    const parentDisplay = parentStyle ? parentStyle.display : '';
+    const isFlexOrGridItem = parentDisplay.includes('flex') || parentDisplay.includes('grid');
+    if (isFlexOrGridItem) return false;
 
     // 4. Standard Inline Tag Check
     const isInlineTag = ['SPAN', 'B', 'STRONG', 'EM', 'I', 'A', 'SMALL', 'MARK'].includes(
@@ -553,10 +596,10 @@ export function isTextContainer(node) {
 
     // 5. Structural Styling Check
     // If a child has a background or border, it's a layout block, not a simple text span.
-    const bgColor = parseColor(style.backgroundColor);
+    const bgColor = parseColor(style.backgroundColor, style);
     const hasVisibleBg = bgColor.hex && bgColor.opacity > 0;
     const hasBorder =
-      parseFloat(style.borderWidth) > 0 && parseColor(style.borderColor).opacity > 0;
+      parseFloat(style.borderWidth) > 0 && parseColor(style.borderColor, style).opacity > 0;
 
     if (hasVisibleBg || hasBorder) {
       // Relaxed check: Allow inline elements with background/border to be treated as text.
@@ -896,7 +939,7 @@ export function generateGradientSVG(w, h, bgString, radius, border) {
           <path d="${pathD}" fill="url(#grad)" ${strokeAttr} />
       </svg>`;
 
-    return 'data:image/svg+xml;base64,' + btoa(svg);
+    return 'data:image/svg+xml;base64,' + btoa(svg.trim());
   } catch (e) {
     console.warn('Gradient generation failed:', e);
     return null;
@@ -933,7 +976,7 @@ export function generateBlurredSVG(w, h, color, radius, blurPx) {
   </svg>`;
 
   return {
-    data: 'data:image/svg+xml;base64,' + btoa(svg),
+    data: 'data:image/svg+xml;base64,' + btoa(svg.trim()),
     padding: padding,
   };
 }
@@ -1068,11 +1111,20 @@ export function collectTextParts(
       // Strip quotes
       const cleanContent = content.replace(/^['"]|['"]$/g, '');
       if (cleanContent.trim()) {
-        const textOpts = getTextStyle(window.getComputedStyle(node), scale);
+        const textOpts = getTextStyle(beforeStyle, scale, false, inheritedOpacity);
         if (hyperlink) textOpts.hyperlink = hyperlink;
 
+        // Apply __spc_ suffix if charSpacing is defined
+        if (textOpts.charSpacing !== undefined) {
+          const spcVal = Math.round(textOpts.charSpacing * 100);
+          if (textOpts.fontFace) {
+            textOpts.fontFace = `${textOpts.fontFace}__spc_${spcVal}`;
+          }
+        }
+
+        const trailSpace = cleanContent.endsWith(' ') || cleanContent.endsWith('\xa0') ? '' : ' ';
         parts.push({
-          text: cleanContent + ' ', // Add space after icon
+          text: cleanContent + trailSpace, // Add space after icon
           options: textOpts,
         });
       }
@@ -1103,6 +1155,14 @@ export function collectTextParts(
 
         const textOpts = getTextStyle(styleToUse, scale, !isRoot, inheritedOpacity);
         if (hyperlink) textOpts.hyperlink = hyperlink;
+
+        // Apply __spc_ suffix if charSpacing is defined
+        if (textOpts.charSpacing !== undefined) {
+          const spcVal = Math.round(textOpts.charSpacing * 100);
+          if (textOpts.fontFace) {
+            textOpts.fontFace = `${textOpts.fontFace}__spc_${spcVal}`;
+          }
+        }
 
         // BUG FIX: Avoid rendering the parent's background as a text highlight for naked text nodes.
         // The parent container's background is typically already rendered as a Shape Fill.
@@ -1148,6 +1208,35 @@ export function collectTextParts(
       }
     }
   });
+
+  // Check for CSS Content (::after) - often used for icons
+  if (node.nodeType === 1) {
+    const afterStyle = window.getComputedStyle(node, '::after');
+    const content = afterStyle.content;
+    if (content && content !== 'none' && content !== 'normal' && content !== '""') {
+      // Strip quotes
+      const cleanContent = content.replace(/^['"]|['"]$/g, '');
+      if (cleanContent.trim()) {
+        const textOpts = getTextStyle(afterStyle, scale, false, inheritedOpacity);
+        if (hyperlink) textOpts.hyperlink = hyperlink;
+
+        // Apply __spc_ suffix if charSpacing is defined
+        if (textOpts.charSpacing !== undefined) {
+          const spcVal = Math.round(textOpts.charSpacing * 100);
+          if (textOpts.fontFace) {
+            textOpts.fontFace = `${textOpts.fontFace}__spc_${spcVal}`;
+          }
+        }
+
+        const leadSpace =
+          cleanContent.startsWith(' ') || cleanContent.startsWith('\xa0') ? '' : ' ';
+        parts.push({
+          text: leadSpace + cleanContent, // Add space before icon/content
+          options: textOpts,
+        });
+      }
+    }
+  }
 
   // Cleanup potential trailing empty breakLines
   while (
